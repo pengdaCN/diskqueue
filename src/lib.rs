@@ -1,19 +1,20 @@
-use std::io;
-use std::sync::{self,mpsc};
-use std::path;
-use std::time;
 use std::fs;
+use std::io;
+use std::path;
+use std::sync::{self, mpsc};
+use std::time;
 
-trait Queue {
+pub trait Queue {
     fn put(&self, bytes: Vec<u8>) -> Result<(), io::Error>;
     fn read_chan(&self) -> mpsc::Receiver<Vec<u8>>;
     fn peek_chan(&self) -> mpsc::Receiver<Vec<u8>>;
-    fn close() -> Result<(),()>;
-    fn delete() -> Result<(),()>;
-    fn depth() -> i64;
-    fn empty() -> Result<(),()>;
+    fn close(mut self) -> Result<(), ()>;
+    fn delete(&mut self) -> Result<(), ()>;
+    fn depth(&self) -> i64;
+    fn empty(&mut self) -> Result<(), ()>;
 }
 
+#[derive(Default)]
 struct DiskQueueState {
     read_pos: i64,
     write_pos: i64,
@@ -22,7 +23,7 @@ struct DiskQueueState {
     depth: i64,
 }
 
-struct DiskQueue {
+pub struct DiskQueue {
     state: sync::RwLock<DiskQueueState>,
 
     name: String,
