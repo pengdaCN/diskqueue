@@ -60,7 +60,7 @@ pub struct DiskQueue {
 
 impl DiskQueue {
     pub fn new(name: String, path: String, max_bytes_per_file: i64, min_msg_size: i32, max_msg_size: i32, sync_timeout: time::Duration) -> Self {
-        let dq = DiskQueue {
+        let mut dq = DiskQueue {
             state: Default::default(),
             name,
             data_path: path.into(),
@@ -79,6 +79,8 @@ impl DiskQueue {
             reader: None,
             write_buf: None,
         };
+
+        let _ = dq.restrict_metadata();
 
         dq
     }
@@ -166,5 +168,9 @@ impl DiskQueue {
 
     fn filename(&self, file_num: i64) -> PathBuf {
         self.data_path.join(&format!("%{}.diskqueue.{:06}.dat", self.name, file_num))
+    }
+
+    fn io_loop(&self) {
+
     }
 }
